@@ -18,7 +18,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- *
+ * 
  * @author adrj
  */
 
@@ -42,7 +42,7 @@ public class Ingrediente {
 
     @Column(name = "costo_por_unidad", nullable = false)
     private Double costoUnitario;
-    
+
     @ManyToOne
     @JoinColumn(name = "receta_id")
     private Receta receta;

@@ -38,7 +38,7 @@ public class RecetaIngrediente {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "receta_id")
-    //@JsonBackReference
+    // @JsonBackReference
     private Receta receta;
 
     @ManyToOne(optional = false)

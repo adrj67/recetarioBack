@@ -42,36 +42,35 @@ public class IngredienteServiceImpl implements IngredienteService {
                 .costoUnitario(guardado.getCostoUnitario())
                 .build();
     }
-    
+
     // Modifica un ingrediente
     @Override
     public IngredienteResponseDTO actualizarIngrediente(Long id, IngredienteRequestDTO request) {
-    Ingrediente ingrediente = ingredienteRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Ingrediente no encontrado con ID: " + id));
+        Ingrediente ingrediente = ingredienteRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente no encontrado con ID: " + id));
 
-    ingrediente.setNombre(request.getNombre());
-    ingrediente.setUnidad(request.getUnidad());
-    ingrediente.setCostoUnitario(request.getCostoUnitario());
+        ingrediente.setNombre(request.getNombre());
+        ingrediente.setUnidad(request.getUnidad());
+        ingrediente.setCostoUnitario(request.getCostoUnitario());
 
-    ingredienteRepository.save(ingrediente);
+        ingredienteRepository.save(ingrediente);
 
-    return IngredienteResponseDTO.builder()
-        .id(ingrediente.getId())
-        .nombre(ingrediente.getNombre())
-        .unidad(ingrediente.getUnidad())
-        .costoUnitario(ingrediente.getCostoUnitario())
-        .build();
-}
-
-// borra un ingrediente
-@Override
-public void eliminarIngrediente(Long id) {
-
-    if (!ingredienteRepository.existsById(id)) {
-        throw new ResourceNotFoundException("Ingrediente no encontrado con ID: " + id);
-    }
-    ingredienteRepository.deleteById(id);
+        return IngredienteResponseDTO.builder()
+                .id(ingrediente.getId())
+                .nombre(ingrediente.getNombre())
+                .unidad(ingrediente.getUnidad())
+                .costoUnitario(ingrediente.getCostoUnitario())
+                .build();
     }
 
-}
+    // borra un ingrediente
+    @Override
+    public void eliminarIngrediente(Long id) {
 
+        if (!ingredienteRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Ingrediente no encontrado con ID: " + id);
+        }
+        ingredienteRepository.deleteById(id);
+    }
+
+}

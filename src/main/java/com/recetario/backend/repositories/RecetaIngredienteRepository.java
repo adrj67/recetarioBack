@@ -17,5 +17,5 @@ public interface RecetaIngredienteRepository extends JpaRepository<RecetaIngredi
     // Borrar los ingredientes de la reta a burrar
     @Transactional
     void deleteByRecetaId(Long recetaId);
-    
+
 }

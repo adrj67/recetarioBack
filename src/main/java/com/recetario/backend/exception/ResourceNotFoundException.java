@@ -8,8 +8,8 @@ package com.recetario.backend.exception;
  *
  * @author adrj
  */
-public class ResourceNotFoundException extends RuntimeException{
-     // Constructor con mensaje
+public class ResourceNotFoundException extends RuntimeException {
+    // Constructor con mensaje
     public ResourceNotFoundException(String mensaje) {
         super(mensaje);
     }

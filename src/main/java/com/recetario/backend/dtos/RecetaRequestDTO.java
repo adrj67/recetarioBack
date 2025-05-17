@@ -39,7 +39,7 @@ public class RecetaRequestDTO {
     private Integer porciones;
 
     private String procedimiento;
-    
+
     private String tips;
 
     private List<IngredienteCantidadDTO> ingredientes;

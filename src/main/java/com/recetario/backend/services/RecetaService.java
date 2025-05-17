@@ -6,15 +6,14 @@ import com.recetario.backend.dtos.RecetaRequestDTO;
 import com.recetario.backend.dtos.RecetaResponseDTO;
 import org.springframework.data.domain.Page;
 
-
 public interface RecetaService {
 
     List<RecetaResponseDTO> listarRecetas();
 
     RecetaResponseDTO crearReceta(RecetaRequestDTO request);
-    
+
     RecetaResponseDTO actualizarReceta(Long id, RecetaRequestDTO request);
-    
+
     void eliminarReceta(Long id);
 
     RecetaResponseDTO buscarPorId(Long id);
@@ -30,6 +29,4 @@ public interface RecetaService {
 
     public Page<RecetaResponseDTO> listar(int page, int size, String sortBy);
 
-
 }
-

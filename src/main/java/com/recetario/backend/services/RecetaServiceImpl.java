@@ -30,8 +30,6 @@ public class RecetaServiceImpl implements RecetaService {
     private final RecetaIngredienteRepository recetaIngredienteRepository;
     private final CloudinaryServiceImpl cloudinaryService;
 
-    
-
     // Listar recetas
     @Override
     public List<RecetaResponseDTO> listarRecetas() {
@@ -41,83 +39,84 @@ public class RecetaServiceImpl implements RecetaService {
 
     // Convierte receta a DTO
     private RecetaResponseDTO convertirADTO(Receta receta) {
-    List<IngredienteDetalleDTO> ingredientesDTO = new ArrayList<>();
+        List<IngredienteDetalleDTO> ingredientesDTO = new ArrayList<>();
 
-    if (receta.getIngredientes() != null) {
-        ingredientesDTO = receta.getIngredientes().stream().map(ri -> {
-            IngredienteDetalleDTO dto = new IngredienteDetalleDTO();
-            dto.setNombre(ri.getIngrediente().getNombre());
-            dto.setCantidad(ri.getCantidad());
-            dto.setUnidad(ri.getIngrediente().getUnidad());
-            dto.setCostoUnitario(ri.getIngrediente().getCostoUnitario());
-            return dto;
-        }).collect(Collectors.toList());
-    }
+        if (receta.getIngredientes() != null) {
+            ingredientesDTO = receta.getIngredientes().stream().map(ri -> {
+                IngredienteDetalleDTO dto = new IngredienteDetalleDTO();
+                dto.setNombre(ri.getIngrediente().getNombre());
+                dto.setCantidad(ri.getCantidad());
+                dto.setUnidad(ri.getIngrediente().getUnidad());
+                dto.setCostoUnitario(ri.getIngrediente().getCostoUnitario());
+                return dto;
+            }).collect(Collectors.toList());
+        }
 
-    return RecetaResponseDTO.builder()
-            .id(receta.getId())
-            .nombre(receta.getNombre())
-            .autor(receta.getAutor())
-            .tipo(receta.getTipo())
-            .porciones(receta.getPorciones())
-            .procedimiento(receta.getProcedimiento())
-            .tips(receta.getTips())
-            .costoTotal(receta.getCostoTotal())
-            .ingredientes(ingredientesDTO)
-            .imagenUrl(receta.getImagenUrl())
-            .build();
+        return RecetaResponseDTO.builder()
+                .id(receta.getId())
+                .nombre(receta.getNombre())
+                .autor(receta.getAutor())
+                .tipo(receta.getTipo())
+                .porciones(receta.getPorciones())
+                .procedimiento(receta.getProcedimiento())
+                .tips(receta.getTips())
+                .costoTotal(receta.getCostoTotal())
+                .ingredientes(ingredientesDTO)
+                .imagenUrl(receta.getImagenUrl())
+                .build();
     }
 
     // Crea una receta nueva
     @Override
     @Transactional
     public RecetaResponseDTO crearReceta(RecetaRequestDTO request) {
-    // 1. Crear y guardar la entidad Receta sin ingredientes
-    Receta receta = Receta.builder()
-            .nombre(request.getNombre())
-            .autor(request.getAutor())
-            .tipo(request.getTipo())
-            .porciones(request.getPorciones())
-            .procedimiento(request.getProcedimiento())
-            .tips(request.getTips())
-            .build();
-    recetaRepository.save(receta); // Necesario para que tenga ID antes de asociar ingredientes
+        // 1. Crear y guardar la entidad Receta sin ingredientes
+        Receta receta = Receta.builder()
+                .nombre(request.getNombre())
+                .autor(request.getAutor())
+                .tipo(request.getTipo())
+                .porciones(request.getPorciones())
+                .procedimiento(request.getProcedimiento())
+                .tips(request.getTips())
+                .build();
+        recetaRepository.save(receta); // Necesario para que tenga ID antes de asociar ingredientes
 
-    // 2. Asociar ingredientes y calcular costo total
-    double costoTotal = 0.0;
-    List<RecetaIngrediente> ingredientesRelacionados = new ArrayList<>();
+        // 2. Asociar ingredientes y calcular costo total
+        double costoTotal = 0.0;
+        List<RecetaIngrediente> ingredientesRelacionados = new ArrayList<>();
 
-    for (IngredienteCantidadDTO i : request.getIngredientes()) {
-        Ingrediente ingrediente = ingredienteRepository.findById(i.getIngredienteId())
-                .orElseThrow(() -> new ResourceNotFoundException("Ingrediente no encontrado con ID: " + i.getIngredienteId()));
+        for (IngredienteCantidadDTO i : request.getIngredientes()) {
+            Ingrediente ingrediente = ingredienteRepository.findById(i.getIngredienteId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Ingrediente no encontrado con ID: " + i.getIngredienteId()));
 
-        double subtotal = i.getCantidad() * ingrediente.getCostoUnitario();
-        costoTotal += subtotal;
+            double subtotal = i.getCantidad() * ingrediente.getCostoUnitario();
+            costoTotal += subtotal;
 
-        RecetaIngrediente ri = new RecetaIngrediente();
-        ri.setReceta(receta); // Asociación importante
-        ri.setIngrediente(ingrediente);
-        ri.setCantidad(i.getCantidad());
-        ingredientesRelacionados.add(ri);
-    }
-
-    // Subir imagen si se incluye
-    if (request.getImagen() != null && !request.getImagen().isEmpty()) {
-        try {
-            String imageUrl = cloudinaryService.uploadImage(request.getImagen());
-            receta.setImagenUrl(imageUrl);
-        } catch (IOException e) {
-            throw new RuntimeException("Error al subir la imagen: ", e);
+            RecetaIngrediente ri = new RecetaIngrediente();
+            ri.setReceta(receta); // Asociación importante
+            ri.setIngrediente(ingrediente);
+            ri.setCantidad(i.getCantidad());
+            ingredientesRelacionados.add(ri);
         }
-    }
 
-    // 3. Asociar la lista a la receta y guardar costo total
-    receta.setIngredientes(ingredientesRelacionados);
-    receta.setCostoTotal(costoTotal);
-    recetaRepository.save(receta); // Guardar con ingredientes y costo
+        // Subir imagen si se incluye
+        if (request.getImagen() != null && !request.getImagen().isEmpty()) {
+            try {
+                String imageUrl = cloudinaryService.uploadImage(request.getImagen());
+                receta.setImagenUrl(imageUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Error al subir la imagen: ", e);
+            }
+        }
 
-    // 4. Retornar respuesta
-    return convertirADTO(receta);
+        // 3. Asociar la lista a la receta y guardar costo total
+        receta.setIngredientes(ingredientesRelacionados);
+        receta.setCostoTotal(costoTotal);
+        recetaRepository.save(receta); // Guardar con ingredientes y costo
+
+        // 4. Retornar respuesta
+        return convertirADTO(receta);
     }
 
     // Modificar receta
@@ -169,7 +168,6 @@ public class RecetaServiceImpl implements RecetaService {
             }
         }
 
-
         return convertirADTO(recetaRepository.save(receta));
     }
 
@@ -186,9 +184,9 @@ public class RecetaServiceImpl implements RecetaService {
     // Buscar receta por ID
     @Override
     public RecetaResponseDTO buscarPorId(Long id) {
-    Receta receta = recetaRepository.findByIdConIngredientes(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Receta no encontrada con ID: " + id));
-    return convertirADTO(receta);
+        Receta receta = recetaRepository.findByIdConIngredientes(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Receta no encontrada con ID: " + id));
+        return convertirADTO(receta);
     }
 
     // Buscar receta por nombre
@@ -215,19 +213,18 @@ public class RecetaServiceImpl implements RecetaService {
     // Buscar receta por nombre+autor+tipo
     @Override
     public List<RecetaResponseDTO> buscarPorTexto(String texto) {
-    return recetaRepository.buscarPorTexto(texto).stream()
-            .map(this::convertirADTO)
-            .collect(Collectors.toList());
+        return recetaRepository.buscarPorTexto(texto).stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
     }
 
     // Listar recetas con paginacion
     @Override
     public Page<RecetaResponseDTO> listar(int page, int size, String sortBy) {
-    Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-    Page<Receta> recetaPage = recetaRepository.findAll(pageable);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        Page<Receta> recetaPage = recetaRepository.findAll(pageable);
 
-    return recetaPage.map(this::convertirADTO);
+        return recetaPage.map(this::convertirADTO);
     }
 
 }
-

@@ -56,13 +56,13 @@ public class Receta {
 
     @Lob
     private String tips;
-    
+
     @Column(name = "costo_total")
     private Double costoTotal;
-    
+
     @OneToMany(mappedBy = "receta", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    //@JsonManagedReference
+    // @JsonManagedReference
     private List<RecetaIngrediente> ingredientes = new ArrayList<>();
 
     @Column(name = "imagenUrl")

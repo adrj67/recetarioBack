@@ -17,7 +17,6 @@ public class IngredienteRequestDTO {
 
     @NotBlank(message = "ingrese una unidad por ej: kilo, litro, gramo, unidad, etc.")
     private String unidad;
-    
+
     private Double costoUnitario;
 }
-
